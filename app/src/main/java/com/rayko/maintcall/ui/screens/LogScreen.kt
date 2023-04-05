@@ -13,12 +13,14 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.rayko.maintcall.navigation.Destination
 import com.rayko.maintcall.viewmodel.CallViewModelAbstract
+import com.rayko.maintcall.R
 import java.text.SimpleDateFormat
 import kotlin.math.floor
 
@@ -55,6 +57,8 @@ fun LogScreen (
             items(callListState.value.size) { index ->
                 val call = callListState.value[index]
                 val dateDownAt = ConvertTime(call.callTime, "date")
+                val called = stringResource(id = R.string.called)
+                val cleared = stringResource(id = R.string.cleared)
                 Column(
                     modifier = Modifier
                         .padding(16.dp)
@@ -67,15 +71,18 @@ fun LogScreen (
                 ) {
                     Row() {
                         headerText (call.equipType + " " + call.equipNum)
-                        headerText (  dateDownAt)
+                        headerText (  dateDownAt)   // Date the call was placed
                     }
                     Row() {
-                        bodyText("Called: " + ConvertTime(call.callTime, "time"))
+                        bodyText(called + ConvertTime(call.callTime, "time"))
                         if (call.callTime == call.clearTime) {
-                            bodyText(txt = "Cleared: ")
+                            bodyText(txt = cleared)
                         } else {
-                            bodyText("Cleared: " + ConvertTime(call.clearTime, "time"))
+                            bodyText(cleared + ConvertTime(call.clearTime, "time"))
                         }
+                    }
+                    Row() {
+                        bodyText(txt = "Summary: ")
                     }
                 }
             }

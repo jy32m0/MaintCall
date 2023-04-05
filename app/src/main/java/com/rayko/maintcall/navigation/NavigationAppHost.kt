@@ -42,11 +42,11 @@ fun NavigationAppHost(navController: NavHostController) {
             }
         }
         composable(Destination.DetailScreen.route) { navBackStackEntry ->
-            val logID = navBackStackEntry.arguments?.getLong("logID")
+            val logID = navBackStackEntry.arguments?.getString("logID")
             if (logID == null) {
                 Toast.makeText(context, "Detail:" + msg, Toast.LENGTH_LONG).show()
             } else {
-                DetailScreen(callViewModel, logID = logID)
+                DetailScreen(callViewModel, logID = logID.toLong())
             }
         }
     }

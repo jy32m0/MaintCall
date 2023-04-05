@@ -22,6 +22,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.rayko.maintcall.data.CallEntity
+import com.rayko.maintcall.ui.theme.postal_blue
 import com.rayko.maintcall.viewmodel.CallViewModelAbstract
 import kotlinx.coroutines.flow.Flow
 
@@ -54,7 +55,7 @@ fun DBCScreen(
                 Text(
                     dbId,
                     fontSize = 22.sp,
-                    color = Color.Blue,
+                    color = postal_blue,
                     textAlign = TextAlign.Center
                 )
             }
