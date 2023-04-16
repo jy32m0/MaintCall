@@ -61,41 +61,41 @@ fun DBCScreen(
             }
         }
     }
-    Toast.makeText(context, "DBCS Screen", Toast.LENGTH_LONG).show()
+//    Toast.makeText(context, "DBCS Screen", Toast.LENGTH_LONG).show()
 }
 
 @Preview
 @Composable
 fun previewDB() {
-    DBCScreen(
-        navController = rememberNavController(),
-        callViewModelDB = object : CallViewModelAbstract {
-            override val callListFlow: Flow<List<CallEntity>>
-                get() = TODO("Not yet implemented")
-
-            override fun getLastCall(call: CallEntity) {
-                TODO("Not yet implemented")
-            }
-
-            override fun getCall(id: Long) {
-                TODO("Not yet implemented")
-            }
-
-            override fun insertCall(call: CallEntity) {
-                TODO("Not yet implemented")
-            }
-
-            override fun updateCall(call: CallEntity) {
-                TODO("Not yet implemented")
-            }
-
-            override fun deleteCall(call: CallEntity) {
-                TODO("Not yet implemented")
-            }
-
-            override fun deleteAllCalls() {
-                TODO("Not yet implemented")
-            }
-        }
-    )
+//    DBCScreen(
+//        navController = rememberNavController(),
+//        callViewModelDB = object : CallViewModelAbstract {
+//            override val callListFlow: Flow<List<CallEntity>>
+//                get() = TODO("Not yet implemented")
+//
+////            override fun getLastCall(call: CallEntity) {
+////                TODO("Not yet implemented")
+////            }
+////
+////            override fun getCall(id: Long) {
+////                TODO("Not yet implemented")
+////            }
+//
+//            override fun insertCall(call: CallEntity) {
+//                TODO("Not yet implemented")
+//            }
+//
+//            override fun updateCall(call: CallEntity) {
+//                TODO("Not yet implemented")
+//            }
+//
+//            override fun deleteCall(call: CallEntity) {
+//                TODO("Not yet implemented")
+//            }
+//
+//            override fun deleteAllCalls() {
+//                TODO("Not yet implemented")
+//            }
+//        }
+//    )
 }

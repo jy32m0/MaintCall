@@ -3,6 +3,7 @@ package com.rayko.maintcall.ui.screens
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -12,6 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -68,6 +70,14 @@ fun LogScreen (
                                 Destination.DetailScreen.routeToDetail(call.roomId)
                             )
                         }
+//                  // *** longPress voids clickable??
+//                        .pointerInput(Unit) {
+//                            detectTapGestures(
+//                                onLongPress = {
+//                                    callViewModelLog.deleteCall(call)
+//                                }
+//                            )
+//                        }
                 ) {
                     Row() {
                         headerText (call.equipType + " " + call.equipNum)
@@ -82,13 +92,20 @@ fun LogScreen (
                         }
                     }
                     Row() {
-                        bodyText(txt = "Summary: ")
+                        if (call.callTime == call.clearTime) {
+                            bodyText(txt = "* NOT CLEARED")
+                        } else {
+                            bodyText(txt = "Down-Time = ${call.downTime}")
+                        }
+                    }
+                    Row() {
+                        bodyText(txt = "${call.callReason} - ${call.clearSolution}")
                     }
                 }
             }
         }
     }
-    Toast.makeText(context, "Log Scree you're in", Toast.LENGTH_LONG).show()
+//    Toast.makeText(context, "Log Scree you're in", Toast.LENGTH_LONG).show()
 }
 
 fun ConvertTime(time: Long, form: String): String {

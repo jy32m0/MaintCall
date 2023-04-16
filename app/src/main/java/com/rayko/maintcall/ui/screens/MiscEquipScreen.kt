@@ -72,5 +72,5 @@ fun MiscEquipScreen(
         }
     }
 
-    Toast.makeText(context, "MiscEquipScreen - " + eqName, Toast.LENGTH_LONG).show()
+//    Toast.makeText(context, "MiscEquipScreen - " + eqName, Toast.LENGTH_LONG).show()
 }

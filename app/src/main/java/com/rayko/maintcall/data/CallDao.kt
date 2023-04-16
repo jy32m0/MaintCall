@@ -10,10 +10,10 @@ interface CallDao {
     fun getAllFlow(): Flow<List<CallEntity>>
 
     @Query("SELECT * FROM call ORDER BY roomId DESC LIMIT 1")
-    fun getLastCall(): Flow<List<CallEntity>>
+    fun getLastCall(): Flow<CallEntity?>
 
     @Query("SELECT * FROM call WHERE roomId = :id")
-    fun getCall(id: Long): Flow<CallEntity>
+    fun getCall(id: Long): Flow<CallEntity?>
 
     @Insert
     suspend fun insert(call: CallEntity)

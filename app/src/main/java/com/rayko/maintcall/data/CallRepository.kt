@@ -8,9 +8,9 @@ class CallRepository (
 ) {
     fun getAllFlow(): Flow<List<CallEntity>> = callDao.getAllFlow()
 
-    fun getLastCall(): Flow<List<CallEntity>> = callDao.getLastCall()
+    fun getLastCall(): Flow<CallEntity?> = callDao.getLastCall()
 
-    fun getCall(id: Long): Flow<CallEntity> = callDao.getCall(id = id)
+    fun getCall(id: Long): Flow<CallEntity?> = callDao.getCall(id = id)
 
     suspend fun insert(call: CallEntity) = callDao.insert(call = call)
 

@@ -57,6 +57,9 @@ dependencies {
     // compose material
     implementation "androidx.compose.material:material:$material_version"
 
+    // icons
+    implementation "androidx.compose.material:material-icons-extended:$compose_version"
+
     // room persistence library
     implementation "androidx.room:room-runtime:$room_version"
 

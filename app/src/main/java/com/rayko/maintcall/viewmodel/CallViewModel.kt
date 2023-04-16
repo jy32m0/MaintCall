@@ -1,5 +1,6 @@
 package com.rayko.maintcall.viewmodel
 
+import androidx.compose.runtime.collectAsState
 import androidx.lifecycle.ViewModel
 import com.rayko.maintcall.data.CallEntity
 import com.rayko.maintcall.data.CallRepository
@@ -7,6 +8,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -15,8 +17,8 @@ import javax.inject.Inject
 
 interface CallViewModelAbstract {
     val callListFlow: Flow<List<CallEntity>>
-    fun getLastCall(call: CallEntity)
-    fun getCall(id: Long)
+    fun getLastCall(): Flow<CallEntity?>
+    fun getCall(id: Long): Flow<CallEntity?>
     fun insertCall(call: CallEntity)
     fun updateCall(call: CallEntity)
     fun deleteCall(call: CallEntity)
@@ -31,21 +33,16 @@ constructor(
 ) : ViewModel(), CallViewModelAbstract {
 
     private val ioScope = CoroutineScope(Dispatchers.IO)
+//    val callById: Flow<CallEntity?> = callRepository.getCall(0)
 
     override val callListFlow: Flow<List<CallEntity>>
         get() = callRepository.getAllFlow()
 
-    override fun getLastCall(call: CallEntity) {
-        ioScope.launch {
-            callRepository.getLastCall()
-        }
-    }
+    override fun getLastCall(): Flow<CallEntity?>
+        = callRepository.getLastCall()
 
-    override fun getCall(id: Long) {
-        ioScope.launch {
-            callRepository.getCall(id = id)
-        }
-    }
+    override fun getCall(id: Long): Flow<CallEntity?>
+        = callRepository.getCall(id)
 
     override fun insertCall(call: CallEntity) {
         ioScope.launch {
