@@ -1,8 +1,10 @@
 package com.rayko.maintcall.ui.screens
 
+import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.TextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Save
@@ -11,7 +13,9 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.modifier.modifierLocalOf
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -26,19 +30,30 @@ import com.rayko.maintcall.viewmodel.CallViewModelAbstract
 //import androidx.compose.material.FloatingActionButton
 
 //val showDialog = mutableStateOf(false)
-//val deleteRec = mutableStateOf(false)
+val deleteRec = mutableStateOf(false)
 
 @OptIn(ExperimentalMaterial3Api::class)     // for Scaffold
 @Composable
 fun DetailScreen(
     navController: NavHostController,
     callViewModelDetail: CallViewModelAbstract,
-    logID: Long,
+    logID: String,
     alertViewModelDetail: AlertViewModel
 ) {
+    var count : Int = 0
+    Log.i("DetailScreen", "debugging: Ln 44 count = $count++")
     val context = LocalContext.current
-    val thisCall by callViewModelDetail.getCall(logID).collectAsState(initial = null)
-    var text by remember { mutableStateOf("") }
+    val thisCall by callViewModelDetail.getCall(logID.toLong()).collectAsState(initial = null)
+    Log.i("DetailScreen", "debugging: Ln 47 count = $count , ${thisCall?.callReason}")
+
+    val reasonOf = thisCall?.callReason ?: ""
+    Log.i("DetailScreen", "debugging: Ln 50 count = $count , ${thisCall?.callReason}")
+    val solutionOf = thisCall?.clearSolution ?: ""
+    Log.i("DetailScreen", "debugging: Ln 52 count = $count , ${thisCall?.clearSolution}")
+    var reason by remember { mutableStateOf("Reason: $reasonOf") }
+    Log.i("DetailScreen", "debugging: Ln 54 count = $count , $reason")
+    var solution by remember { mutableStateOf("Solution: $solutionOf") }
+    Log.i("DetailScreen", "debugging: Ln 56 count = $count , $solution")
 
     thisCall?.let { thisCall ->
         Scaffold(
@@ -57,10 +72,6 @@ fun DetailScreen(
                                 .size(size = 40.dp)
                                 .clickable {
                                     alertViewModelDetail.onDelete()
-                                    if (deleteRec.value) {
-                                        callViewModelDetail.deleteCall(thisCall)
-                                        navController.popBackStack()
-                                    }
                                 },
                             imageVector = Icons.Default.Delete,
                             contentDescription = "Delete Icon",
@@ -83,6 +94,9 @@ fun DetailScreen(
                             modifier = Modifier
                                 .size(size = 40.dp)
                                 .clickable {
+                                    Log.i("DetailScreen", "debugging: Ln 97 count = $count , ${thisCall.callReason}")
+//                                    thisCall.callReason = reason
+//                                    thisCall.clearSolution = solution
                                     callViewModelDetail.updateCall(thisCall)
                                     navController.popBackStack()
                                 },
@@ -103,15 +117,17 @@ fun DetailScreen(
             },
         ) {
             Column(modifier = Modifier
-                .fillMaxWidth()
-                .height(200.dp)
-                .clip(shape = RoundedCornerShape(10.dp))
+                .fillMaxSize()
+//                .clip(shape = RoundedCornerShape(10.dp))
             ) {
                 val commonModifier = Modifier
                     .padding(5.dp)
                     .weight(1f)
                 val miscModifier = Modifier
                     .padding(5.dp)
+                val rowModifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 5.dp)
 
                 var clearedAt = ConvertTime(thisCall.clearTime, "time")
                 var downedFor = ConvertTime(thisCall.downTime, "time")
@@ -121,25 +137,27 @@ fun DetailScreen(
                 }
 
                 Row(
-                    Modifier.fillMaxWidth()
+                    modifier = rowModifier
                 ) {
                     Text(
                         text = "${thisCall.equipType} ${thisCall.equipNum}",
                         fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold,
                         modifier = commonModifier
                     )
                     Text(
                         text = ConvertTime(thisCall.callTime, "date"),
                         fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold,
                         modifier = commonModifier,
                         textAlign = TextAlign.Right
                     )
                 }
 
                 Row(
-                    Modifier.fillMaxWidth()
+                    modifier = rowModifier
+                        .clickable {  }     // add TimePicker for clearedAt
                 ) {
-
                     Text(
                         text = "Called @ ${ConvertTime(thisCall.callTime, "time")}",
                         modifier = commonModifier
@@ -149,43 +167,58 @@ fun DetailScreen(
                         modifier = commonModifier
                     )
                 }
-
-                Text(text = "Down-time = $downedFor", miscModifier)
-                Text(text = "Reason: ${thisCall.callReason}", miscModifier)
-                Text(text = "Solution: ${thisCall.clearSolution}", miscModifier)
+                Column(
+                    modifier = rowModifier
+                ) {
+                    Text(text = "Down-time = $downedFor", miscModifier)
+                }
+                Row(
+                    modifier = rowModifier
+                ) {
+                    TextField(
+                        value = reason,
+                        onValueChange = { newReason ->
+                            reason = newReason
+                        },
+                        textStyle = TextStyle(fontSize = 18.sp)
+                    )
+                }
+                Row(
+                    modifier = rowModifier
+                ) {
+                    TextField(value = solution,
+                        onValueChange = { newSolution ->
+                            solution = newSolution
+                        },
+                        textStyle = TextStyle(fontSize = 18.sp)
+                    )
+                }
             }
         }
     }
+    // when pressed DELETE
     if (alertViewModelDetail.showAlert) {
-
+        DialogDelete(
+            onConfirm = {
+                callViewModelDetail.deleteCall(thisCall)
+                alertViewModelDetail.onDismissAlert()
+                navController.popBackStack()
+            },
+            onDismiss = { alertViewModelDetail.onDismissAlert()
+            }
+        )
     }
 }
-
-//@Composable
-//fun DialogDelete() {
-//    AlertDialog(
-//        onDismissRequest = {
-//            showDialog.value = false
-//        },
-//        title = {
-//            Text(text = "Title")
-//        },
-//        text = {
-//            Text("Custom Text")
-//        },
-//        confirmButton = {
-//            androidx.compose.material.Button(
-//                onClick = { deleteRec.value = true}
-//            ) {
-//                Text(text = "DELETE")
-//            }
-//        }
-//    )
-//}
-
 
 @Preview
 @Composable
 fun PreviewDetail() {
-
+    var testText by remember { mutableStateOf("")}
+    Column() {
+        Text(text = "Title: ")
+        TextField(
+            value = testText,
+            onValueChange = { testText = it }
+        )
+    }
 }

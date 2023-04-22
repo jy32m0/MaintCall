@@ -22,7 +22,7 @@ interface CallDao {
     suspend fun update(call: CallEntity)
 
     @Delete
-    suspend fun delete(call: CallEntity)
+    suspend fun delete(call: CallEntity?)
 
     @Query("DELETE FROM call")
     suspend fun deleteAll()

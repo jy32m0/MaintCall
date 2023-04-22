@@ -5,12 +5,14 @@ import androidx.compose.material.Button
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 
 @Composable
 fun DialogDelete(
-    onDismiss:()->Unit,
-    onConfirm:()->Unit
+    // refer to AlertViewModel
+    onConfirm:()->Unit,
+    onDismiss:()->Unit
 ) {
     AlertDialog(
         onDismissRequest = {
@@ -26,12 +28,17 @@ fun DialogDelete(
             Button(
                 onClick = { onConfirm() }
             ) {
-                Text(text = "DELETE")
+                Text(
+                    text = "DELETE",
+                    color = Color.White
+                )
             }
             Button(
                 onClick = { onDismiss() }
             ) {
-                Text(text = "Cancel")    
+                Text(
+                    text = "Cancel",
+                    color = Color.White)
             }
         }
     )
@@ -40,7 +47,8 @@ fun DialogDelete(
 @Preview
 @Composable
 fun prvDialog() {
-    DialogDelete(onDismiss = { /*TODO*/ }) {
-        
-    }
+    DialogDelete(
+        onConfirm = {},
+        onDismiss = { /*TODO*/ }
+    )
 }

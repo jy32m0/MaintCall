@@ -48,7 +48,7 @@ fun NavigationAppHost(navController: NavHostController) {
             if (logID == null) {
                 Toast.makeText(context, "Detail:" + msg, Toast.LENGTH_LONG).show()
             } else {
-                DetailScreen(navController, callViewModel, logID = logID.toLong(), alertViewModel)
+                DetailScreen(navController, callViewModel, logID = logID.toString(), alertViewModel)
             }
         }
     }

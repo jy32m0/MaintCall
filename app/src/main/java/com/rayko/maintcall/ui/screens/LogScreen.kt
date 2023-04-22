@@ -67,7 +67,7 @@ fun LogScreen (
                         .height(120.dp)
                         .clickable {
                             navController.navigate(
-                                Destination.DetailScreen.routeToDetail(call.roomId)
+                                Destination.DetailScreen.routeToDetail(call.roomId.toString())
                             )
                         }
 //                  // *** longPress voids clickable??

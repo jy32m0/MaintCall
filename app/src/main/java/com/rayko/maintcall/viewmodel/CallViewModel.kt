@@ -21,7 +21,7 @@ interface CallViewModelAbstract {
     fun getCall(id: Long): Flow<CallEntity?>
     fun insertCall(call: CallEntity)
     fun updateCall(call: CallEntity)
-    fun deleteCall(call: CallEntity)
+    fun deleteCall(call: CallEntity?)
     fun deleteAllCalls()
 }
 
@@ -56,7 +56,7 @@ constructor(
         }
     }
 
-    override fun deleteCall(call: CallEntity) {
+    override fun deleteCall(call: CallEntity?) {
         ioScope.launch {
             callRepository.delete(call = call)
         }
