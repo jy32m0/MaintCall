@@ -41,19 +41,13 @@ fun DetailScreen(
     alertViewModelDetail: AlertViewModel
 ) {
     var count : Int = 0
-    Log.i("DetailScreen", "debugging: Ln 44 count = $count++")
     val context = LocalContext.current
     val thisCall by callViewModelDetail.getCall(logID.toLong()).collectAsState(initial = null)
-    Log.i("DetailScreen", "debugging: Ln 47 count = $count , ${thisCall?.callReason}")
 
     val reasonOf = thisCall?.callReason ?: ""
-    Log.i("DetailScreen", "debugging: Ln 50 count = $count , ${thisCall?.callReason}")
     val solutionOf = thisCall?.clearSolution ?: ""
-    Log.i("DetailScreen", "debugging: Ln 52 count = $count , ${thisCall?.clearSolution}")
     var reason by remember { mutableStateOf("Reason: $reasonOf") }
-    Log.i("DetailScreen", "debugging: Ln 54 count = $count , $reason")
     var solution by remember { mutableStateOf("Solution: $solutionOf") }
-    Log.i("DetailScreen", "debugging: Ln 56 count = $count , $solution")
 
     thisCall?.let { thisCall ->
         Scaffold(
