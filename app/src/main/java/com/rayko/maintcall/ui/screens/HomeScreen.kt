@@ -44,7 +44,9 @@ fun HomeScreen (navController: NavHostController) {
                 Destination.MiscEquipScreen.routeToMisc(equipName.get(dest))
             )
             3 -> navController.navigate(Destination.DBCScreen.route)
-            else -> Toast.makeText(context, "Selection is not valid.", Toast.LENGTH_LONG).show()
+            else -> Toast.makeText(context,
+                "Reserved for future development. Please select another.",
+                    Toast.LENGTH_LONG).show()
         }
     }
 
@@ -52,10 +54,8 @@ fun HomeScreen (navController: NavHostController) {
         topBar = { TopBar() },
     ){
         LazyColumn {
-
             items(equipName.size) { index ->
                 Spacer(modifier = Modifier.height(35.dp))
-
                 Box(modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 35.dp)

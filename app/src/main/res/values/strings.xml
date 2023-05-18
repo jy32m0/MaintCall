@@ -1,5 +1,6 @@
 <resources>
     <string name="app_name">MaintCall</string>
-    <string name="called">Called @&#032;</string>
-    <string name="cleared">Cleared @&#032;</string>
+    <string name="called">Called @\u0020</string>
+    <string name="cleared">Cleared @\u0020</string>
+    <string name="downed">Down-time:\u0020</string>
 </resources>

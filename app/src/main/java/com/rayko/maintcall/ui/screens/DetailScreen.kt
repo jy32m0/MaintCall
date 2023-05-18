@@ -3,17 +3,15 @@ package com.rayko.maintcall.ui.screens
 import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.TextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.modifier.modifierLocalOf
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -21,7 +19,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+//import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
+import com.rayko.maintcall.CalledTime
+import com.rayko.maintcall.ClearedTime
+import com.rayko.maintcall.ConvertTime
+import com.rayko.maintcall.downedTime
+import com.rayko.maintcall.ui.TimePicker
 import com.rayko.maintcall.ui.theme.postal_blue
 import com.rayko.maintcall.ui.theme.postal_red
 import com.rayko.maintcall.viewmodel.AlertViewModel
@@ -40,22 +44,54 @@ fun DetailScreen(
     logID: String,
     alertViewModelDetail: AlertViewModel
 ) {
-    var count : Int = 0
-    Log.i("DetailScreen", "debugging: Ln 44 count = $count++")
     val context = LocalContext.current
-    val thisCall by callViewModelDetail.getCall(logID.toLong()).collectAsState(initial = null)
-    Log.i("DetailScreen", "debugging: Ln 47 count = $count , ${thisCall?.callReason}")
+    val thisCall by callViewModelDetail.getCall(logID.toLong()).collectAsState(initial = null)    //collectAsStateWithLifecycle (initialValue = null)
 
-    val reasonOf = thisCall?.callReason ?: ""
-    Log.i("DetailScreen", "debugging: Ln 50 count = $count , ${thisCall?.callReason}")
-    val solutionOf = thisCall?.clearSolution ?: ""
-    Log.i("DetailScreen", "debugging: Ln 52 count = $count , ${thisCall?.clearSolution}")
-    var reason by remember { mutableStateOf("Reason: $reasonOf") }
-    Log.i("DetailScreen", "debugging: Ln 54 count = $count , $reason")
-    var solution by remember { mutableStateOf("Solution: $solutionOf") }
-    Log.i("DetailScreen", "debugging: Ln 56 count = $count , $solution")
+    Log.i("DetailScreen",
+        "debugging: 54: equipment is ${thisCall?.equipType} ${thisCall?.equipNum}")
 
-    thisCall?.let { thisCall ->
+    var clearedAt = rememberSaveable { 0L }
+
+    var isTimePickerVisible by rememberSaveable { mutableStateOf(false) }
+    if (isTimePickerVisible) {
+        TimePicker(
+            onCancel = {
+                Log.i("DetailScreen","debugging: 68: Cancelled")
+                isTimePickerVisible = false
+            },
+            onConfirm = {
+                clearedAt = System.currentTimeMillis()
+                Log.i("DetailScreen","debugging: 73: Confirmed, clearedAt = $clearedAt")
+                isTimePickerVisible = false
+                        },
+            content = {}
+        )
+    }
+
+    thisCall?.let { currCall ->
+
+        var reason by rememberSaveable { mutableStateOf( currCall?.callReason ?: "" )} //"Reason: $reasonOf") }
+        var solution by rememberSaveable { mutableStateOf( currCall?.clearSolution ?: "") }
+        var downedFor = currCall.clearTime - currCall.callTime
+        val dateConverted = ConvertTime(timeCalled = currCall.callTime, form = "dateCalled")
+        val calledConverted = CalledTime(currCall.callTime)
+        var clearedConverted = "* N/C"
+        var downedConverted = "* N/C"
+        if (currCall.callTime != currCall.clearTime) {
+            clearedConverted = ClearedTime(currCall.clearTime)
+            downedConverted = downedTime(currCall.downTime)
+        }
+
+        val textEquip = "${currCall.equipType} ${currCall.equipNum}"
+
+        fun saveThis() {
+            currCall.callReason = reason
+            currCall.clearSolution = solution
+            currCall.clearTime = clearedAt
+            currCall.downTime = downedFor
+            callViewModelDetail.updateCall(currCall)
+        }
+
         Scaffold(
             floatingActionButton = {
                 Row(
@@ -94,10 +130,12 @@ fun DetailScreen(
                             modifier = Modifier
                                 .size(size = 40.dp)
                                 .clickable {
-                                    Log.i("DetailScreen", "debugging: Ln 97 count = $count , ${thisCall.callReason}")
 //                                    thisCall.callReason = reason
 //                                    thisCall.clearSolution = solution
-                                    callViewModelDetail.updateCall(thisCall)
+//                                    thisCall.clearTime = clearedAt
+//                                    thisCall.downTime = downedFor
+//                                    callViewModelDetail.updateCall(thisCall)
+                                    saveThis()
                                     navController.popBackStack()
                                 },
                             imageVector = Icons.Default.Save,
@@ -116,10 +154,8 @@ fun DetailScreen(
                 }
             },
         ) {
-            Column(modifier = Modifier
-                .fillMaxSize()
-//                .clip(shape = RoundedCornerShape(10.dp))
-            ) {
+
+            Column(modifier = Modifier.fillMaxSize()) {
                 val commonModifier = Modifier
                     .padding(5.dp)
                     .weight(1f)
@@ -129,67 +165,60 @@ fun DetailScreen(
                     .fillMaxWidth()
                     .padding(vertical = 5.dp)
 
-                var clearedAt = ConvertTime(thisCall.clearTime, "time")
-                var downedFor = ConvertTime(thisCall.downTime, "time")
-                if (thisCall.callTime == thisCall.clearTime) {
-                    clearedAt = "* N/C"
-                    downedFor = "* N/C"
-                }
-
                 Row(
                     modifier = rowModifier
                 ) {
                     Text(
-                        text = "${thisCall.equipType} ${thisCall.equipNum}",
+                        text = textEquip,   //"${thisCall.equipType} ${thisCall.equipNum}",
                         fontSize = 20.sp,
                         fontWeight = FontWeight.Bold,
                         modifier = commonModifier
                     )
                     Text(
-                        text = ConvertTime(thisCall.callTime, "date"),
+                        text = dateConverted,
                         fontSize = 20.sp,
                         fontWeight = FontWeight.Bold,
                         modifier = commonModifier,
                         textAlign = TextAlign.Right
                     )
                 }
-
                 Row(
                     modifier = rowModifier
-                        .clickable {  }     // add TimePicker for clearedAt
                 ) {
                     Text(
-                        text = "Called @ ${ConvertTime(thisCall.callTime, "time")}",
+                        text = calledConverted,
                         modifier = commonModifier
                     )
                     Text(
-                        text = "Cleared @ $clearedAt",
+                        text = clearedConverted,    // "Pau"
                         modifier = commonModifier
+                            .clickable {
+                                isTimePickerVisible = true
+                                Log.i("DetailScreen","debugging: 209: Clicked, $isTimePickerVisible")
+                            }      // add TimePicker for clearedAt
                     )
                 }
                 Column(
                     modifier = rowModifier
                 ) {
-                    Text(text = "Down-time = $downedFor", miscModifier)
-                }
-                Row(
-                    modifier = rowModifier
-                ) {
+                    Text(text = downedConverted, miscModifier)
+
+                    Text("Reason: ", miscModifier)
                     TextField(
                         value = reason,
-                        onValueChange = { newReason ->
-                            reason = newReason
+                        onValueChange = {
+                            reason = it
                         },
+                        miscModifier,
                         textStyle = TextStyle(fontSize = 18.sp)
                     )
-                }
-                Row(
-                    modifier = rowModifier
-                ) {
-                    TextField(value = solution,
-                        onValueChange = { newSolution ->
-                            solution = newSolution
+                    Text("Solution: ", miscModifier)
+                    TextField(
+                        value = solution,    // thisCall?.clearSolution ?: "Solution: ",
+                        onValueChange = {
+                            solution = it
                         },
+                        miscModifier,
                         textStyle = TextStyle(fontSize = 18.sp)
                     )
                 }

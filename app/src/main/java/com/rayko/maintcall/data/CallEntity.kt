@@ -22,7 +22,7 @@ data class CallEntity(
     var clearTime: Long = callTime,
 
     @ColumnInfo(name = "down_time")
-    var downTime: Long = clearTime - callTime,
+    var downTime: Long = 0L,
 
     @ColumnInfo(name = "call_reason")
     var callReason: String? = "",

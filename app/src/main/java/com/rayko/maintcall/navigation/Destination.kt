@@ -16,7 +16,7 @@ sealed class Destination(val route: String) {
     }
 
     object DetailScreen: Destination("detail/{logID}") {
-        fun routeToDetail(logID: String)
-                                = "detail/$logID"
+        fun routeToDetail(logID: Long)
+                                = "detail/${logID.toString()}"
     }
 }

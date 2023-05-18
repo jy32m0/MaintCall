@@ -11,15 +11,24 @@ abstract class CallDatabase : RoomDatabase() {
     abstract fun callDao(): CallDao
 
     companion object {
+        @Volatile
         private var INSTANCE: CallDatabase? = null
 
         fun getInstance(context: Context): CallDatabase {
-            if (INSTANCE == null) {
-                INSTANCE = Room.databaseBuilder(context, CallDatabase::class.java, "call.db")
-                    .fallbackToDestructiveMigration()
-                    .build()
+            synchronized(this) {
+                var instance = INSTANCE
+                if (instance == null) {
+                    instance = Room.databaseBuilder(
+                        context,
+                        CallDatabase::class.java,
+                        "call.db"
+                    )
+                        .fallbackToDestructiveMigration()
+                        .build()
+                    INSTANCE = instance
+                }
+                return instance // INSTANCE as CallDatabase
             }
-            return INSTANCE as CallDatabase
         }
     }
 }

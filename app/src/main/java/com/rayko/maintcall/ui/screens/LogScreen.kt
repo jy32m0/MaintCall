@@ -1,28 +1,32 @@
 package com.rayko.maintcall.ui.screens
 
 import android.util.Log
-import android.widget.Toast
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.runtime.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import com.rayko.maintcall.CalledDate
+import com.rayko.maintcall.CalledTime
+import com.rayko.maintcall.ClearedTime
+import com.rayko.maintcall.ConvertTime
+import com.rayko.maintcall.downedTime
 import com.rayko.maintcall.navigation.Destination
 import com.rayko.maintcall.viewmodel.CallViewModelAbstract
-import com.rayko.maintcall.R
 import java.text.SimpleDateFormat
 import kotlin.math.floor
 
@@ -36,7 +40,7 @@ fun LogScreen (
     val context = LocalContext.current
     val callListState = callViewModelLog.callListFlow.collectAsState(initial = listOf())
 
-    Log.i("LogScreen", "debugging: 35 equipName is $equipName $equipNum")
+    Log.i("LogScreen", "debugging: 43:  equipName is $equipName $equipNum")
 
     @Composable
     fun RowScope.headerText(txt: String) {
@@ -54,81 +58,58 @@ fun LogScreen (
         )
     }
 
+
     Scaffold {
         LazyColumn {
-            items(callListState.value.size) { index ->
+            items(
+                callListState.value.size
+            ) { index ->
+
                 val call = callListState.value[index]
-                val dateDownAt = ConvertTime(call.callTime, "date")
-                val called = stringResource(id = R.string.called)
-                val cleared = stringResource(id = R.string.cleared)
+                val dateDownAt = CalledDate(time = call.callTime)
+                val calledConverted = CalledTime(time = call.callTime)
+                var clearedConverted = "* NOT CLEARED"
+                var downedConverted = "* NOT CLEARED"
+
+                if (call.callTime != call.clearTime) {
+                    clearedConverted = ClearedTime(call.clearTime)
+                    downedConverted = downedTime(time = call.downTime)
+//                    downedConverted = "$downed ${ConvertTime(timeDowned = call.downTime / 1000, form = "diff")}"
+                }
+
+                Log.i("LogScreen", "debugging: 80: equipName is $equipName")
+
                 Column(
                     modifier = Modifier
                         .padding(16.dp)
                         .height(120.dp)
                         .clickable {
                             navController.navigate(
-                                Destination.DetailScreen.routeToDetail(call.roomId.toString())
+                                Destination.DetailScreen.routeToDetail(call.roomId)
                             )
                         }
-//                  // *** longPress voids clickable??
-//                        .pointerInput(Unit) {
-//                            detectTapGestures(
-//                                onLongPress = {
-//                                    callViewModelLog.deleteCall(call)
-//                                }
-//                            )
-//                        }
                 ) {
                     Row() {
                         headerText (call.equipType + " " + call.equipNum)
-                        headerText (  dateDownAt)   // Date the call was placed
+                        headerText ( dateDownAt )   // Date the call was placed
                     }
                     Row() {
-                        bodyText(called + ConvertTime(call.callTime, "time"))
-                        if (call.callTime == call.clearTime) {
-                            bodyText(txt = cleared)
-                        } else {
-                            bodyText(cleared + ConvertTime(call.clearTime, "time"))
-                        }
+                        bodyText(calledConverted)
+                        bodyText(clearedConverted)
                     }
                     Row() {
-                        if (call.callTime == call.clearTime) {
-                            bodyText(txt = "* NOT CLEARED")
-                        } else {
-                            bodyText(txt = "Down-Time = ${call.downTime}")
-                        }
+                        bodyText(downedConverted)
                     }
                     Row() {
                         bodyText(txt = "${call.callReason} - ${call.clearSolution}")
                     }
                 }
+
             }
         }
     }
-//    Toast.makeText(context, "Log Scree you're in", Toast.LENGTH_LONG).show()
 }
 
-fun ConvertTime(time: Long, form: String): String {
-    val dateFormat = SimpleDateFormat("MM/ dd/ yyyy")
-    val timeFormat = SimpleDateFormat("HH:mm:ss")
-    var converted = "??"
-    when (form) {
-        "date" -> converted = dateFormat.format(time)
-        "time" -> converted = timeFormat.format(time)
-    }
-
-    fun timeDiff() {
-        val diff = (1678225600900 - 1678219200000) / 1000.0
-        val hour = floor(diff / 3600).toInt()
-        val min = floor((diff % 3600) / 60).toInt()
-        converted = if (hour < 1) {
-            "$min Minutes"
-        } else {
-            "$hour Hour $min Minutes"
-        }
-    }
-    return converted
-}
 
 @Preview
 @Composable
@@ -136,26 +117,31 @@ fun PreviewLogScreen() {
     val dateFormat = SimpleDateFormat("MM / dd / yyyy")
     val timeFormat = SimpleDateFormat("HH:mm:ss")
     val text: String = dateFormat.format(1678144183980)
-    val text2: String = timeFormat.format(1678144183980)
+    val text2: String = timeFormat.format(77962129)
 
     val timeDiff = (1678225600900 - 1678219200000) / 1000.0
-    val hour = floor(timeDiff / 3600).toInt()
-    val min = floor((timeDiff % 3600) / 60).toInt()
-    var text3 = "Total Down-Time"
+    var hour = floor(timeDiff / 3600).toInt()
+    var min = floor((timeDiff % 3600) / 60).toInt()
+
+    val downTime: Long = 609054704 / 1000
+    hour = floor(downTime / 3600.00).toInt()
+    min = floor((downTime % 3600.00) / 60.00).toInt()
+
+    var text3 = ""  //""Total Down-Time:"
     if (hour < 1) {
-        text3 = "$min Minutes"
+        text3 = "$text3 $min Minutes"
     } else {
-        text3 = "$hour Hour $min Minutes"
+        text3 = "$text3 $hour Hour $min Minutes"
     }
 
     Row( modifier = Modifier) {
         Text(
-            text,
+            text3,
             color= Color.White,
             modifier = Modifier.weight(2f)
         )
-        Text(text3.toString(), color=Color.White,
-            modifier = Modifier.weight(1f))
+//        Text(text3.toString(), color=Color.White,
+//            modifier = Modifier.weight(1f))
     }
 
 //    LogScreen(

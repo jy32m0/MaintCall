@@ -11,7 +11,7 @@ android {
 
     defaultConfig {
         applicationId "com.rayko.maintcall"
-        minSdk 21
+        minSdk 26
         targetSdk 33
         versionCode 1
         versionName "1.0"
@@ -50,9 +50,16 @@ android {
 
 dependencies {
 
+//    // lifecycle for compose
+//    implementation "androidx.lifecycle:lifecycle-runtime-compose:$lifecycle_version"
+
     // navigation
     implementation "androidx.navigation:navigation-compose:$nav_version"
     implementation "androidx.hilt:hilt-navigation-compose:1.0.0"
+
+    // date and time pickers
+    implementation "io.github.vanpra.compose-material-dialogs:datetime:0.8.1-rc"
+
 
     // compose material
     implementation "androidx.compose.material:material:$material_version"
@@ -62,6 +69,7 @@ dependencies {
 
     // room persistence library
     implementation "androidx.room:room-runtime:$room_version"
+    implementation 'androidx.core:core-ktx:1.9.0'
 
     // changed annotationProcessor to kapt due to "callDatabase_Impl does not exist" error
     kapt "androidx.room:room-compiler:$room_version"

@@ -36,7 +36,7 @@ fun NavigationAppHost(navController: NavHostController) {
         composable(Destination.LogScreen.route) { navBackStackEntry ->
             val equipName = navBackStackEntry.arguments?.getString("equipDestName")
             val equipNum = navBackStackEntry.arguments?.getString("equipDestNum")
-            Log.i("NavigationAppHost", "debugging: 36 equipName is $equipName $equipNum")
+            Log.i("NavigationAppHost", "debugging: 39 equipName is $equipName $equipNum")
             if (equipName == null || equipNum == null) {
                 Toast.makeText(context, "LogEquipment" + msg, Toast.LENGTH_LONG).show()
             } else {
@@ -48,7 +48,7 @@ fun NavigationAppHost(navController: NavHostController) {
             if (logID == null) {
                 Toast.makeText(context, "Detail:" + msg, Toast.LENGTH_LONG).show()
             } else {
-                DetailScreen(navController, callViewModel, logID = logID.toString(), alertViewModel)
+                DetailScreen(navController, callViewModel, logID = logID, alertViewModel)
             }
         }
     }
