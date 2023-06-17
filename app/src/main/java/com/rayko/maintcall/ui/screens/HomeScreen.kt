@@ -52,8 +52,10 @@ fun HomeScreen (navController: NavHostController) {
 
     Scaffold (
         topBar = { TopBar() },
-    ){
-        LazyColumn {
+    ){ padding ->
+        LazyColumn (
+            modifier = Modifier.padding(padding)
+                ) {
             items(equipName.size) { index ->
                 Spacer(modifier = Modifier.height(35.dp))
                 Box(modifier = Modifier

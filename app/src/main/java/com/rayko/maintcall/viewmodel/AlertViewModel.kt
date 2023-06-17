@@ -5,16 +5,15 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 
+
 class AlertViewModel : ViewModel() {
 
-    var showAlert by mutableStateOf(false)
+    var showDelete by mutableStateOf(false)
         private set
+    fun onDelete() { showDelete = true }
+    fun onDismissDelete() { showDelete = false }
 
-    fun onDelete() {
-        showAlert = true
-    }
-
-    fun onDismissAlert() {
-        showAlert = false
-    }
+    var showDropDown by mutableStateOf(false)
+    fun onDropDown() { showDropDown = true }
+    fun onDismissDropDown() { showDropDown = false }
 }

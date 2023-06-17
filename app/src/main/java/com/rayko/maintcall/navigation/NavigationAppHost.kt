@@ -11,6 +11,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.rayko.maintcall.ui.screens.*
 import com.rayko.maintcall.viewmodel.AlertViewModel
 import com.rayko.maintcall.viewmodel.CallViewModel
+import com.rayko.maintcall.viewmodel.DetailViewModel
 
 @Composable
 fun NavigationAppHost(navController: NavHostController) {
@@ -19,6 +20,7 @@ fun NavigationAppHost(navController: NavHostController) {
     val msg = " Name or Number is missing!"
     val callViewModel = hiltViewModel<CallViewModel>()
     val alertViewModel = AlertViewModel()
+    val detailViewModel = DetailViewModel()
 
     NavHost(
         navController = navController, startDestination = "home"
@@ -48,7 +50,9 @@ fun NavigationAppHost(navController: NavHostController) {
             if (logID == null) {
                 Toast.makeText(context, "Detail:" + msg, Toast.LENGTH_LONG).show()
             } else {
-                DetailScreen(navController, callViewModel, logID = logID, alertViewModel)
+                DetailScreen(navController, callViewModel, logID = logID,
+                    alertViewModel = alertViewModel, detailViewModel = detailViewModel
+                )
             }
         }
     }

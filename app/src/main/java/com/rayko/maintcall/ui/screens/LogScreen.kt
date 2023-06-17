@@ -10,20 +10,16 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
-import com.rayko.maintcall.CalledDate
-import com.rayko.maintcall.CalledTime
-import com.rayko.maintcall.ClearedTime
-import com.rayko.maintcall.ConvertTime
+import com.rayko.maintcall.calledDate
+import com.rayko.maintcall.calledTime
+import com.rayko.maintcall.clearedTime
 import com.rayko.maintcall.downedTime
 import com.rayko.maintcall.navigation.Destination
 import com.rayko.maintcall.viewmodel.CallViewModelAbstract
@@ -60,19 +56,21 @@ fun LogScreen (
 
 
     Scaffold {
-        LazyColumn {
+        LazyColumn (
+            modifier = Modifier.padding(it)     // to use the PaddingValue
+        ) {
             items(
                 callListState.value.size
             ) { index ->
 
                 val call = callListState.value[index]
-                val dateDownAt = CalledDate(time = call.callTime)
-                val calledConverted = CalledTime(time = call.callTime)
+                val dateDownAt = calledDate(time = call.callTime)
+                val calledConverted = calledTime(time = call.callTime)
                 var clearedConverted = "* NOT CLEARED"
                 var downedConverted = "* NOT CLEARED"
 
                 if (call.callTime != call.clearTime) {
-                    clearedConverted = ClearedTime(call.clearTime)
+                    clearedConverted = clearedTime(call.clearTime)
                     downedConverted = downedTime(time = call.downTime)
 //                    downedConverted = "$downed ${ConvertTime(timeDowned = call.downTime / 1000, form = "diff")}"
                 }

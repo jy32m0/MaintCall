@@ -38,7 +38,7 @@ constructor(
 //    val callById: Flow<CallEntity?> = callRepository.getCall(0)
 
     override val callListFlow: Flow<List<CallEntity>>
-        get() = callRepository.getAllFlow()
+       = callRepository.getAllFlow()
 
     override fun getLastCall(): Flow<CallEntity?>
         = callRepository.getLastCall()

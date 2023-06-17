@@ -21,15 +21,16 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 //import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
-import com.rayko.maintcall.CalledTime
-import com.rayko.maintcall.ClearedTime
-import com.rayko.maintcall.ConvertTime
+import com.rayko.maintcall.clearedTime
+import com.rayko.maintcall.convertTime
+import com.rayko.maintcall.calledTime
 import com.rayko.maintcall.downedTime
 import com.rayko.maintcall.ui.TimePicker
 import com.rayko.maintcall.ui.theme.postal_blue
 import com.rayko.maintcall.ui.theme.postal_red
 import com.rayko.maintcall.viewmodel.AlertViewModel
 import com.rayko.maintcall.viewmodel.CallViewModelAbstract
+import com.rayko.maintcall.viewmodel.DetailViewModel
 
 //import androidx.compose.material.FloatingActionButton
 
@@ -41,8 +42,9 @@ val deleteRec = mutableStateOf(false)
 fun DetailScreen(
     navController: NavHostController,
     callViewModelDetail: CallViewModelAbstract,
+    detailViewModel: DetailViewModel,
     logID: String,
-    alertViewModelDetail: AlertViewModel
+    alertViewModel: AlertViewModel
 ) {
     val context = LocalContext.current
     val thisCall by callViewModelDetail.getCall(logID.toLong()).collectAsState(initial = null)    //collectAsStateWithLifecycle (initialValue = null)
@@ -60,25 +62,26 @@ fun DetailScreen(
                 isTimePickerVisible = false
             },
             onConfirm = {
-                clearedAt = System.currentTimeMillis()
-                Log.i("DetailScreen","debugging: 73: Confirmed, clearedAt = $clearedAt")
+                Log.i("DetailScreen","debugging: 65: Confirmed")
+                clearedAt = detailViewModel.getMilliTime()    //System.currentTimeMillis()
+                Log.i("DetailScreen","debugging: 67: Confirmed, clearedAt = $clearedAt")
                 isTimePickerVisible = false
                         },
             content = {}
         )
-    }
+    }   // if (isTimePickerVisible)
 
     thisCall?.let { currCall ->
 
         var reason by rememberSaveable { mutableStateOf( currCall?.callReason ?: "" )} //"Reason: $reasonOf") }
         var solution by rememberSaveable { mutableStateOf( currCall?.clearSolution ?: "") }
         var downedFor = currCall.clearTime - currCall.callTime
-        val dateConverted = ConvertTime(timeCalled = currCall.callTime, form = "dateCalled")
-        val calledConverted = CalledTime(currCall.callTime)
+        val dateConverted = convertTime(timeCalled = currCall.callTime, form = "dateCalled")
+        val calledConverted = calledTime(currCall.callTime)
         var clearedConverted = "* N/C"
         var downedConverted = "* N/C"
         if (currCall.callTime != currCall.clearTime) {
-            clearedConverted = ClearedTime(currCall.clearTime)
+            clearedConverted = clearedTime(currCall.clearTime)
             downedConverted = downedTime(currCall.downTime)
         }
 
@@ -107,7 +110,7 @@ fun DetailScreen(
                             modifier = Modifier
                                 .size(size = 40.dp)
                                 .clickable {
-                                    alertViewModelDetail.onDelete()
+                                    alertViewModel.onDelete()
                                 },
                             imageVector = Icons.Default.Delete,
                             contentDescription = "Delete Icon",
@@ -130,11 +133,6 @@ fun DetailScreen(
                             modifier = Modifier
                                 .size(size = 40.dp)
                                 .clickable {
-//                                    thisCall.callReason = reason
-//                                    thisCall.clearSolution = solution
-//                                    thisCall.clearTime = clearedAt
-//                                    thisCall.downTime = downedFor
-//                                    callViewModelDetail.updateCall(thisCall)
                                     saveThis()
                                     navController.popBackStack()
                                 },
@@ -155,7 +153,11 @@ fun DetailScreen(
             },
         ) {
 
-            Column(modifier = Modifier.fillMaxSize()) {
+            Column(  // Main Column
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(it)
+            ) {
                 val commonModifier = Modifier
                     .padding(5.dp)
                     .weight(1f)
@@ -190,7 +192,7 @@ fun DetailScreen(
                         modifier = commonModifier
                     )
                     Text(
-                        text = clearedConverted,    // "Pau"
+                        text = clearedConverted,    // call cleared at
                         modifier = commonModifier
                             .clickable {
                                 isTimePickerVisible = true
@@ -223,17 +225,17 @@ fun DetailScreen(
                     )
                 }
             }
-        }
+        }   // Main Column in Scaffold
     }
     // when pressed DELETE
-    if (alertViewModelDetail.showAlert) {
+    if (alertViewModel.showDelete) {
         DialogDelete(
             onConfirm = {
                 callViewModelDetail.deleteCall(thisCall)
-                alertViewModelDetail.onDismissAlert()
+                alertViewModel.onDismissDelete()
                 navController.popBackStack()
             },
-            onDismiss = { alertViewModelDetail.onDismissAlert()
+            onDismiss = { alertViewModel.onDismissDelete()
             }
         )
     }

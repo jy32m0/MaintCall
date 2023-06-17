@@ -1,86 +1,100 @@
 package com.rayko.maintcall
 
-import android.util.Log
-import android.app.DatePickerDialog
-import android.widget.DatePicker
+//import androidx.compose.material.Text
+import android.annotation.SuppressLint
+import androidx.compose.material3.Text
+//import androidx.compose.material.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuBox
+//import androidx.compose.material.DropdownMenuItem
+import androidx.compose.material3.DropdownMenuItem
+//import androidx.compose.material.TextField
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Button
-import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Card
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.ExposedDropdownMenuDefaults
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Surface
-import androidx.compose.material.Text
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.Layout
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Devices
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.content.res.TypedArrayUtils.getString
 import java.text.SimpleDateFormat
-import java.util.Calendar
 import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.floor
 import kotlin.math.sin
+import androidx.compose.ui.tooling.preview.Devices
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.rayko.maintcall.viewmodel.DetailViewModel
+
 
 private val primaryColor = Color(68, 71, 70)
 private val secondaryColor = Color(68, 71, 70)
 private val selectedColor = Color(104, 220, 255, 255)
 
-
-
 fun toDay(): String {
-    return ConvertTime(System.currentTimeMillis(), form = "dateCalled")
+    return convertTime(System.currentTimeMillis(), form = "dateCalled")
+}
+
+@SuppressLint("SimpleDateFormat")
+fun timeNow(u: TimePart): Int {
+    val formatHour = SimpleDateFormat("HH")
+    val formatMinute = SimpleDateFormat("mm")
+    return when (u) {
+        TimePart.Hour -> formatHour.format(System.currentTimeMillis()).toInt()
+        TimePart.Minute -> formatMinute.format(System.currentTimeMillis()).toInt()
+        else -> 0
+    }
+}
+
+//fun hourMinToMilli(hh: Int, mm: Int): Long {
+//
+//}
+
+@Composable
+fun calledDate(time: Long): String {
+    return  convertTime(timeCalled = time, form = "dateCalled")
 }
 
 @Composable
-fun CalledDate(time: Long): String {
-    return  ConvertTime(timeCalled = time, form = "dateCalled")
-}
-
-@Composable
-fun CalledTime(time: Long): String {
+fun calledTime(time: Long): String {
     val called = stringResource(id = R.string.called)
-    return "$called ${ConvertTime(timeCalled = time, form = "timeCalled")}"
+    return "$called ${convertTime(timeCalled = time, form = "timeCalled")}"
 }
 
 @Composable
-fun ClearedTime(time: Long): String {
+fun clearedTime(time: Long): String {
     val cleared = stringResource(id = R.string.cleared)
-    return "$cleared ${ConvertTime(timeCleared = time, form = "timeCleared")}"
+    return "$cleared ${convertTime(timeCleared = time, form = "timeCleared")}"
 }
 
 @Composable
 fun downedTime(time: Long): String {
     val downed = stringResource(id = R.string.downed)
-    return "$downed ${ConvertTime(timeDowned = time / 1000, form = "diff")}"
+    return "$downed ${convertTime(timeDowned = time / 1000, form = "diff")}"
 }
 
-//downedConverted = "$downed ${ConvertTime(timeDowned = thisCall.downTime / 1000, form = "diff")}"
-
-fun ConvertTime(
+fun convertTime(
     timeCalled: Long = 0L,
     timeCleared: Long = 0L,
     timeDowned: Long = 0L,
@@ -106,7 +120,7 @@ fun ConvertTime(
     return converted
 }
 
-//************************* USED IN TimePicker **************************
+//************************* VV USED IN TimePicker VV **************************
 
 @Composable
 fun Clock(
@@ -213,7 +227,7 @@ fun TimeCard(
         modifier = Modifier.clickable { onClick() }
     ) {
         Text(
-            text = if (time == 0) "00" else time.toString(),
+            text = String.format("%02d", time),  //time.toString(),
             fontSize = 26.sp,
             color = if (isSelected) secondaryColor else Color.White,
             modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp)
@@ -226,7 +240,62 @@ enum class TimePart { Hour, Minute }
 private const val step = PI * 2 / 12
 private fun angleForIndex(hour: Int) = -PI / 2 + step * hour
 
+@OptIn(ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class)
+@Composable
+fun ExposedDropdownMenu(
+    detailViewModel: DetailViewModel = viewModel(),
+    items: List<Int>,
+    selectedItem: String,
+    selectedItemChanged: (String) -> Unit,
+    label: String   //@Composable () -> Unit
+) {
+    var expanded by rememberSaveable { mutableStateOf(false) }
+//    var selectedNumber = detailViewModel.dropDownSelected
+//    var selectedOptionText by rememberSaveable { mutableStateOf("") }
 
+    ExposedDropdownMenuBox(
+        expanded = expanded,
+        onExpandedChange = {
+            expanded = !expanded
+        }
+    ) {
+        OutlinedTextField(
+            modifier = Modifier
+                .menuAnchor()
+                .width(90.dp),
+            value = selectedItem.toString(),
+            onValueChange = { selectedItemChanged },
+            readOnly = true,
+            label = {
+                Text(
+                    text = label,
+                    style = MaterialTheme.typography.body2
+                )
+            },
+            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) }
+        )
+
+        ExposedDropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false },
+        ) {
+            items.forEach { selectionOption ->
+                DropdownMenuItem(
+                    text = { Text(selectionOption.toString()) },
+                    onClick = {
+                        if (label == TimePart.Hour.toString()) {
+                            detailViewModel.updateDropDownSelectedHour(selectionOption)
+                        } else {
+                            detailViewModel.updateDropDownSelectedMin(selectionOption)
+                        }
+                        expanded = false
+                    },
+//                    contentPadding = ExposedDropdownMenuDefaults.DropdownMenuItemContentPadding,
+                )
+            }
+        }
+    }
+}
 @Composable
 fun ClockMarksRoman(selectedPart: TimePart, selectedTime: Int, onTime: (Int) -> Unit) {
     if (selectedPart == TimePart.Hour) {
@@ -270,16 +339,20 @@ fun ClockMarksRoman(selectedPart: TimePart, selectedTime: Int, onTime: (Int) -> 
     }
 }
 
-//************************* USED IN TimePicker **************************
+//************************* ^^ USED IN TimePicker ^^ **************************
 
 
-//@Preview(device = Devices.PIXEL_4, showSystemUi = true)
-//@Composable
-//fun TimerPickerPreview() {
-////    Box(contentAlignment = Alignment.Center) {
-//    TimePicker(
-//        onCancel = { Log.i("Scratch","debugging: 132: Cancelled") },
-//        onConfirm = { Log.i("Scratch","debugging: 133: Confirmed") })
-////    }
-//}
+@Preview(device = Devices.PIXEL_4, showSystemUi = true)
+@Composable
+fun TimerPickerPreview() {
+    var pickedHour by rememberSaveable { mutableStateOf(timeNow(TimePart.Hour)) }
+    ExposedDropdownMenu(
+        items = (1..23).toList(),
+        selectedItem = pickedHour.toString(),  //selectedNumber,
+        selectedItemChanged = { index ->
+            pickedHour = index.toInt()
+        },
+        label ="Hour"
+    )
+}
 
