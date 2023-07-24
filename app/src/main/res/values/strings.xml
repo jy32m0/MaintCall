@@ -3,4 +3,5 @@
     <string name="called">Called @\u0020</string>
     <string name="cleared">Cleared @\u0020</string>
     <string name="downed">Down-time:\u0020</string>
+    <string name="close">Close this call</string>
 </resources>

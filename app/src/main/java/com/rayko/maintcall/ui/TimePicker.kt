@@ -1,6 +1,7 @@
 package com.rayko.maintcall.ui
 
 //import android.text.format.DateFormat.format
+import android.annotation.SuppressLint
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -42,34 +43,24 @@ import com.rayko.maintcall.viewmodel.DetailViewModel
 import java.lang.String.format
 
 
+@SuppressLint("DefaultLocale")
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun TimePicker(
-    detailViewModel: DetailViewModel = viewModel(),
+    detailViewModel: DetailViewModel,// = viewModel(),
     title: String = "Select Time",
     onCancel: () -> Unit,
     onConfirm: () -> Unit,
     toggle: @Composable () -> Unit = {},
     content: @Composable () -> Unit
 ) {
-//    var pickedHour by rememberSaveable { mutableStateOf(timeNow(TimePart.Hour)) }
-//    var pickedMin by rememberSaveable { mutableStateOf(timeNow(TimePart.Minute)) }
-    var pickedPart by rememberSaveable { mutableStateOf(TimePart.Hour) }
-    var pickedDate = detailViewModel.selectedDate   // by rememberSaveable { mutableStateOf(toDay()) }
-    Log.i("TimePicker", "debugging: 59 pickedDate = $pickedDate")
-//    var expanded by rememberSaveable { mutableStateOf(false) }
-
-//    var selectedNumber by remember { mutableStateOf(0) }
-
-//    var numbers = (1..23).toList()
-//    if (pickedPart == TimePart.Minute) {
-//        numbers = (1..59).toList()
-//    }
-
+    var pickedDate = detailViewModel.selectedDate
+    val pickedHour = format("%02d", detailViewModel.dropDownSelectedHour)
+    val pickedMin = format("%02d", detailViewModel.dropDownSelectedMin)
 
     var showDatePicker by rememberSaveable { mutableStateOf(false) }
     if (showDatePicker) {
-        PickDate { date ->
+        PickDate(detailViewModel) { date ->
             pickedDate = date
         }
         showDatePicker = false
@@ -88,12 +79,11 @@ fun TimePicker(
                     color = Color.Yellow //MaterialTheme.colors.surface
                 ),
         ) {
-
             Column(
                 modifier = Modifier.padding(24.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text(   // "Select Time"
+                Text(   /** "Select Time" */
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(bottom = 20.dp),
@@ -102,7 +92,7 @@ fun TimePicker(
                     textAlign = TextAlign.Center
                 )
 
-                Box(    // Date
+                Box(        /** Date */
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(bottom = 10.dp)
@@ -114,20 +104,22 @@ fun TimePicker(
                             .clickable(enabled = true) { showDatePicker = true },
                         textAlign = TextAlign.Center
                     )
-                }   // Date
+                }           /** Date */
 
-                Row(    // Hour and Minute TimeCards
+                Row(    /** Hour and Minute TimeCards */
                     modifier = Modifier
                         .align(Alignment.CenterHorizontally)
                 ) {
-                    ExposedDropdownMenu(    // Hour TimeCard
+                    ExposedDropdownMenu(    /** Hour TimeCard */
+                        detailViewModel,
                         items = (1..23).toList(),
-                        selectedItem = format("%02d", detailViewModel.dropDownSelectedHour),  //selectedNumber,
+                        selectedItem = pickedHour,
+//                        selectedItem = format("%02d", detailViewModel.dropDownSelectedHour),  //selectedNumber,
                         selectedItemChanged = {
                             detailViewModel.updateDropDownSelectedHour(it.toInt())
                         },
                         label = TimePart.Hour.toString()  // { Text("Hour") }
-                    )   // Hour TimeCard
+                    )                       /** Hour TimeCard */
 
                     Text(
                         text = ":",
@@ -136,15 +128,16 @@ fun TimePicker(
                     )
 //                    Spacer(modifier = Modifier.width(16.dp))
 
-                    ExposedDropdownMenu(    // Minute TimeCard
+                    ExposedDropdownMenu(    /** Minute TimeCard */
+                        detailViewModel,
                         items = (1..59).toList(),
-                        selectedItem = format("%02d", detailViewModel.dropDownSelectedMin),
+                        selectedItem = pickedMin, // format("%02d", detailViewModel.dropDownSelectedMin),
                         selectedItemChanged = {
                             detailViewModel.updateDropDownSelectedMin(it.toInt())
                         },
                         label = TimePart.Minute.toString()  // { androidx.compose.material.Text("Minute") }
-                    )   // Minute TimeCard
-                }   // Hour and Minute TimeCards
+                    )                       /** Minute TimeCard */
+                }   /** Hour and Minute TimeCards */
 
                 Row(
                     modifier = Modifier
@@ -164,13 +157,13 @@ fun TimePicker(
     }
 }       // End of TimePicker()
 
-@Preview
-@Composable
-fun showPicker() {
-    TimePicker(
-        onCancel = { Log.i("TimePicker","Preview Cancel") },
-        onConfirm = { Log.i("TimePicker","Preview Confirm") },
-        toggle = { Log.i("TimePicker","Preview toggle") },
-        content = { Log.i("TimePicker","Preview content") }
-    )
-}
+//@Preview
+//@Composable
+//fun showPicker() {
+//    TimePicker(
+//        onCancel = { Log.i("TimePicker","Preview Cancel") },
+//        onConfirm = { Log.i("TimePicker","Preview Confirm") },
+//        toggle = { Log.i("TimePicker","Preview toggle") },
+//        content = { Log.i("TimePicker","Preview content") }
+//    )
+//}

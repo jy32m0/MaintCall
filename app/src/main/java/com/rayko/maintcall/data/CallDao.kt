@@ -19,7 +19,7 @@ interface CallDao {
     suspend fun insert(call: CallEntity)
 
     @Update
-    suspend fun update(call: CallEntity)
+    suspend fun update(call: CallEntity?)
 
     @Delete
     suspend fun delete(call: CallEntity?)

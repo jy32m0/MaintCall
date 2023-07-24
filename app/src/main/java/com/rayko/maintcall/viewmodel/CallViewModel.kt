@@ -22,7 +22,7 @@ interface CallViewModelAbstract {
     fun getLastCall(): Flow<CallEntity?>
     fun getCall(id: Long): Flow<CallEntity?>
     fun insertCall(call: CallEntity)
-    fun updateCall(call: CallEntity)
+    fun updateCall(call: CallEntity?)
     fun deleteCall(call: CallEntity?)
     fun deleteAllCalls()
 }
@@ -52,7 +52,7 @@ constructor(
         }
     }
 
-    override fun updateCall(call: CallEntity) {
+    override fun updateCall(call: CallEntity?) {
         ioScope.launch {
             callRepository.update(call = call)
         }

@@ -15,6 +15,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.rayko.maintcall.viewmodel.DetailViewModel
+
 //import androidx.compose.ui.window.Window
 //import androidx.compose.ui.window.application
 //
@@ -25,12 +27,12 @@ import androidx.compose.ui.unit.dp
 //}
 
 @Composable
-fun MyApp() {
+fun MyApp(detailViewModel: DetailViewModel) {
     var selectedHour by remember { mutableStateOf("") }
     var selectedMinute by remember { mutableStateOf("") }
 
     Row {
-        ExposedDropdownMenu(
+        ExposedDropdownMenu(detailViewModel,
             items = (1..23).toList(),
             selectedItem = selectedHour,
             selectedItemChanged = { index ->
@@ -41,7 +43,7 @@ fun MyApp() {
 
         Spacer(modifier = Modifier.width(16.dp))
 
-        ExposedDropdownMenu(
+        ExposedDropdownMenu(detailViewModel,
             items = (1..59).toList(),
             selectedItem = selectedMinute,
             selectedItemChanged = { index ->
@@ -94,8 +96,8 @@ fun MyApp() {
 //    }
 //}
 
-@Preview
-@Composable
-fun PreviewMyApp() {
-    MyApp()
-}
+//@Preview
+//@Composable
+//fun PreviewMyApp() {
+//    MyApp()
+//}

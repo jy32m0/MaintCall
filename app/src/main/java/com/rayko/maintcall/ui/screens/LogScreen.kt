@@ -54,7 +54,6 @@ fun LogScreen (
         )
     }
 
-
     Scaffold {
         LazyColumn (
             modifier = Modifier.padding(it)     // to use the PaddingValue
@@ -102,7 +101,6 @@ fun LogScreen (
                         bodyText(txt = "${call.callReason} - ${call.clearSolution}")
                     }
                 }
-
             }
         }
     }
@@ -129,7 +127,7 @@ fun PreviewLogScreen() {
     if (hour < 1) {
         text3 = "$text3 $min Minutes"
     } else {
-        text3 = "$text3 $hour Hour $min Minutes"
+        text3 = "$text3 $hour Hours $min Minutes"
     }
 
     Row( modifier = Modifier) {

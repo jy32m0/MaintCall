@@ -12,7 +12,6 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -21,10 +20,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 //import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
-import com.rayko.maintcall.clearedTime
-import com.rayko.maintcall.convertTime
-import com.rayko.maintcall.calledTime
-import com.rayko.maintcall.downedTime
 import com.rayko.maintcall.ui.TimePicker
 import com.rayko.maintcall.ui.theme.postal_blue
 import com.rayko.maintcall.ui.theme.postal_red
@@ -32,10 +27,6 @@ import com.rayko.maintcall.viewmodel.AlertViewModel
 import com.rayko.maintcall.viewmodel.CallViewModelAbstract
 import com.rayko.maintcall.viewmodel.DetailViewModel
 
-//import androidx.compose.material.FloatingActionButton
-
-//val showDialog = mutableStateOf(false)
-val deleteRec = mutableStateOf(false)
 
 @OptIn(ExperimentalMaterial3Api::class)     // for Scaffold
 @Composable
@@ -46,17 +37,64 @@ fun DetailScreen(
     logID: String,
     alertViewModel: AlertViewModel
 ) {
-    val context = LocalContext.current
-    val thisCall by callViewModelDetail.getCall(logID.toLong()).collectAsState(initial = null)    //collectAsStateWithLifecycle (initialValue = null)
+    detailViewModel.ToScreen(id = logID)
 
-    Log.i("DetailScreen",
-        "debugging: 54: equipment is ${thisCall?.equipType} ${thisCall?.equipNum}")
+//    val NOT_CLEARED = "* N/C"
+    var clearedConverted = detailViewModel.clearedConverted
+    var downedConverted = detailViewModel.downedConverted
+    var clearedAt = detailViewModel.clearedAt
+    var reason = detailViewModel.reason
+    var solution = detailViewModel.solution
+//    var saveNow = detailViewModel.saveNow
+    var dateConverted = detailViewModel.dateConverted
+    var calledConverted = detailViewModel.calledConverted
+    var textEquip = detailViewModel.textEquip
+//    var isTimePickerVisible = detailViewModel.isTimePickerVisible
 
-    var clearedAt = rememberSaveable { 0L }
+//
+////    var asRecorded: () -> Unit
+//
+    val thisCall by callViewModelDetail.getCall(logID.toLong())
+        .collectAsState(initial = null)    //collectAsStateWithLifecycle (initialValue = null)
 
+//    thisCall?.let {
+//
+////        asRecorded = {
+////            detailViewModel.updateSelectedDate(2003, 2, 1)
+////        }
+//
+//        dateConverted = convertTime(timeCalled = it.callTime, form = "dateCalled")
+//        calledConverted = calledTime(it.callTime)
+//        textEquip = "${it.equipType} ${it.equipNum}"
+//
+//        if (it.callTime != it.clearTime) {
+//            clearedConverted = clearedTime(it.clearTime)
+//            downedConverted = downedTime(it.downTime)
+//        }
+//
+//        if (saveNow) {      /** true from TimePicker, confirm */
+//
+//            if (it.callTime != clearedAt) {
+//                it.clearTime = clearedAt
+//                clearedConverted = clearedTime(it.clearTime)
+//                it.downTime = it.clearTime - it.callTime
+//                downedConverted = downedTime(it.downTime)
+//            }
+//
+//            it.callReason = reason
+//            it.clearSolution = solution
+//
+//            callViewModelDetail.updateCall(it)
+//
+//            saveNow = false
+//        }
+//    }
+//
+    /** TimePicker for call clear */
     var isTimePickerVisible by rememberSaveable { mutableStateOf(false) }
     if (isTimePickerVisible) {
         TimePicker(
+            detailViewModel,
             onCancel = {
                 Log.i("DetailScreen","debugging: 68: Cancelled")
                 isTimePickerVisible = false
@@ -65,34 +103,30 @@ fun DetailScreen(
                 Log.i("DetailScreen","debugging: 65: Confirmed")
                 clearedAt = detailViewModel.getMilliTime()    //System.currentTimeMillis()
                 Log.i("DetailScreen","debugging: 67: Confirmed, clearedAt = $clearedAt")
+                detailViewModel.saveNow = true
                 isTimePickerVisible = false
-                        },
+            },
             content = {}
         )
     }   // if (isTimePickerVisible)
+//
 
-    thisCall?.let { currCall ->
-
-        var reason by rememberSaveable { mutableStateOf( currCall?.callReason ?: "" )} //"Reason: $reasonOf") }
-        var solution by rememberSaveable { mutableStateOf( currCall?.clearSolution ?: "") }
-        var downedFor = currCall.clearTime - currCall.callTime
-        val dateConverted = convertTime(timeCalled = currCall.callTime, form = "dateCalled")
-        val calledConverted = calledTime(currCall.callTime)
-        var clearedConverted = "* N/C"
-        var downedConverted = "* N/C"
-        if (currCall.callTime != currCall.clearTime) {
-            clearedConverted = clearedTime(currCall.clearTime)
-            downedConverted = downedTime(currCall.downTime)
-        }
-
-        val textEquip = "${currCall.equipType} ${currCall.equipNum}"
-
-        fun saveThis() {
-            currCall.callReason = reason
-            currCall.clearSolution = solution
-            currCall.clearTime = clearedAt
-            currCall.downTime = downedFor
-            callViewModelDetail.updateCall(currCall)
+//        if (alertViewModel.confirmDelete) {
+//            alertViewModel.ConfirmDeleteRec(id = logID)
+//        }
+        // when pressed DELETE
+        if (alertViewModel.showDelete) {
+            DialogDelete(
+                onConfirm = {
+//                    alertViewModel.confirmDelete = true
+                    callViewModelDetail.deleteCall(thisCall)
+                    alertViewModel.onDismissDelete()
+                    navController.popBackStack()
+                },
+                onDismiss = {
+                    alertViewModel.onDismissDelete()
+                }
+            )
         }
 
         Scaffold(
@@ -133,7 +167,7 @@ fun DetailScreen(
                             modifier = Modifier
                                 .size(size = 40.dp)
                                 .clickable {
-                                    saveThis()
+                                    detailViewModel.saveNow = true
                                     navController.popBackStack()
                                 },
                             imageVector = Icons.Default.Save,
@@ -196,7 +230,10 @@ fun DetailScreen(
                         modifier = commonModifier
                             .clickable {
                                 isTimePickerVisible = true
-                                Log.i("DetailScreen","debugging: 209: Clicked, $isTimePickerVisible")
+                                Log.i(
+                                    "DetailScreen",
+                                    "debugging: 191: Clicked, $isTimePickerVisible"
+                                )
                             }      // add TimePicker for clearedAt
                     )
                 }
@@ -227,19 +264,7 @@ fun DetailScreen(
             }
         }   // Main Column in Scaffold
     }
-    // when pressed DELETE
-    if (alertViewModel.showDelete) {
-        DialogDelete(
-            onConfirm = {
-                callViewModelDetail.deleteCall(thisCall)
-                alertViewModel.onDismissDelete()
-                navController.popBackStack()
-            },
-            onDismiss = { alertViewModel.onDismissDelete()
-            }
-        )
-    }
-}
+//}
 
 @Preview
 @Composable

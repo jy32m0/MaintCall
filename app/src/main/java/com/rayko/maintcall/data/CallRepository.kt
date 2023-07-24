@@ -15,7 +15,7 @@ class CallRepository (
 
     suspend fun insert(call: CallEntity) = callDao.insert(call = call)
 
-    suspend fun update(call: CallEntity) = callDao.update(call = call)
+    suspend fun update(call: CallEntity?) = callDao.update(call = call)
 
     suspend fun delete(call: CallEntity?) = callDao.delete(call = call)
 

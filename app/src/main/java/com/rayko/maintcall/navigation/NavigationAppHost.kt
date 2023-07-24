@@ -19,8 +19,8 @@ fun NavigationAppHost(navController: NavHostController) {
     val context = LocalContext.current
     val msg = " Name or Number is missing!"
     val callViewModel = hiltViewModel<CallViewModel>()
-    val alertViewModel = AlertViewModel()
-    val detailViewModel = DetailViewModel()
+    val alertViewModel = AlertViewModel(callViewModel)
+    val detailViewModel = DetailViewModel(callViewModel)   //(callViewModel, logID = 0L) /** parameters Added for 7-17 */
 
     NavHost(
         navController = navController, startDestination = "home"
@@ -38,7 +38,7 @@ fun NavigationAppHost(navController: NavHostController) {
         composable(Destination.LogScreen.route) { navBackStackEntry ->
             val equipName = navBackStackEntry.arguments?.getString("equipDestName")
             val equipNum = navBackStackEntry.arguments?.getString("equipDestNum")
-            Log.i("NavigationAppHost", "debugging: 39 equipName is $equipName $equipNum")
+            Log.i("NavigationAppHost", "debugging: 41 equipName is $equipName $equipNum")
             if (equipName == null || equipNum == null) {
                 Toast.makeText(context, "LogEquipment" + msg, Toast.LENGTH_LONG).show()
             } else {
@@ -50,8 +50,12 @@ fun NavigationAppHost(navController: NavHostController) {
             if (logID == null) {
                 Toast.makeText(context, "Detail:" + msg, Toast.LENGTH_LONG).show()
             } else {
-                DetailScreen(navController, callViewModel, logID = logID,
-                    alertViewModel = alertViewModel, detailViewModel = detailViewModel
+                DetailScreen(
+                    navController,
+                    callViewModel,
+                    detailViewModel = detailViewModel,
+                    logID = logID,
+                    alertViewModel = alertViewModel
                 )
             }
         }
